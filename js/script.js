@@ -1,79 +1,93 @@
 /*
-# This project is based on a public project but has been modified 
-# according to the requirements of the IST 107 Course.
-# Instructor: Washington Valencia
-# Institution: CCTB College
+# Este projeto é baseado em um projeto público, mas foi modificado 
+# de acordo com os requisitos do Curso IST 107.
+# Instrutor: Washington Valencia
+# Instituição: CCTB College
 */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Array of colors for background change
+    // Array de cores para mudança de fundo
     const colors = ['#F0E68C', '#FFDAB9', '#FFE4B5', '#D8BFD8', '#B0E0E6', '#AFEEEE', '#E0FFFF', '#98FB98', '#FFDEAD', '#F5DEB3'];
 
     let index = 0;
 
-    // Function to change background color with a gradient effect
+    // Função para alterar a cor de fundo com um efeito de gradiente
     const changeBackgroundColor = () => {
         document.body.style.backgroundColor = colors[index];
-        index = (index + 1) % colors.length; // Loop back to the start
+        index = (index + 1) % colors.length; // Loop para reiniciar o ciclo
     };
 
-    // Change color every 2 seconds with a smooth transition
+    // Mudar a cor a cada 2 segundos com uma transição suave
     setInterval(changeBackgroundColor, 2000);
 });
 
-let enterButton = document.getElementById("enter");
+let tasks = [];
+
+let addButton = document.getElementById("addButton");
+let askUserButton = document.getElementById("askUserButton");
 let input = document.getElementById("userInput");
 let ul = document.querySelector("ul");
-let item = document.getElementsByTagName("li");
 
 function inputLength() {
     return input.value.length;
 }
 
-function listLength() {
-    return item.length;
+function taskExists(task) {
+    return tasks.includes(task.toLowerCase());
 }
 
-function createListElement() {
-    let li = document.createElement("li"); // creates an element "li"
-    li.appendChild(document.createTextNode(input.value)); //makes text from input field the li text
-    ul.appendChild(li); //adds li to ul
-    input.value = ""; //Reset text input field
+function createListElement(task) {
+    let li = document.createElement("li");
+    li.appendChild(document.createTextNode(task));
+    ul.appendChild(li);
+    input.value = "";
 
-
-    //START STRIKETHROUGH
-    // because it's in the function, it only adds it for new items
-    function crossOut() {
-        li.classList.toggle("done");
-    }
-
-    li.addEventListener("click", crossOut);
-    //END STRIKETHROUGH
-
-
-    // START ADD DELETE BUTTON
+    // Adicionar botão de deletar a cada tarefa
     let dBtn = document.createElement("button");
     dBtn.appendChild(document.createTextNode("X"));
+    dBtn.classList.add("delete-btn");
     li.appendChild(dBtn);
 
+    dBtn.addEventListener("click", () => {
+        ul.removeChild(li);
+        tasks = tasks.filter(t => t !== task.toLowerCase());
+    });
 }
 
+function addTask(task) {
+    if (!taskExists(task)) {
+        tasks.push(task.toLowerCase());
+        createListElement(task);
+    } else {
+        alert("Task already exists!");
+    }
+}
 
 function addListAfterClick() {
-    if (inputLength() > 0) { //makes sure that an empty input field doesn't create a li
-        createListElement();
+    if (inputLength() > 0) {
+        addTask(input.value);
     }
 }
 
 function addListAfterKeypress(event) {
-    if (inputLength() > 0 && event.which === 13) { //this now looks to see if you hit "enter"/"return"
-        //the 13 is the enter key's keycode, this could also be display by event.keyCode === 13
-        createListElement();
+    if (inputLength() > 0 && event.which === 13) {
+        addTask(input.value);
     }
 }
 
+function askUserForTasks() {
+    let task;
+    while (true) {
+        task = prompt("Please enter a new task (or leave empty to stop):");
+        if (!task) break;
+        if (taskExists(task)) {
+            alert("Task already exists! Please enter a new task.");
+        } else {
+            addTask(task);
+        }
+    }
+}
 
-enterButton.addEventListener("click", addListAfterClick);
-
+addButton.addEventListener("click", addListAfterClick);
 input.addEventListener("keypress", addListAfterKeypress);
-
+askUserButton.addEventListener("click", askUserForTasks);
